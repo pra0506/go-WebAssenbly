@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	http.Handle("/", http.FileServer(http.Dir("")))
+	http.Handle("/", http.FileServer(http.Dir("/home/pra/project/wasm")))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

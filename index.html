@@ -9,18 +9,27 @@
     <h1>Go WebAssembly</h1>
     <script src="./wasm_exec.js"></script>
     <script>
+        if (!WebAssembly.instantiateStreaming) { // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
         const go = new Go();
-        let mod, instance;
+        let mod, inst;
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
             mod = result.module;
             inst = result.instance;
             document.getElementById("run").disabled = false;
+        }).catch((err) => {
+            console.error(err);
         });
- 
+
         async function run() {
             console.clear();
-            await go.run(instance);
-            instance = await WebAssembly.instantiate(mod, go.importObject);
+            await go.run(inst);
+            inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
         }
     </script>
     <button onClick="run();" id="run" disabled>Run</button>
